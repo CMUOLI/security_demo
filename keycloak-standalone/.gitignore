@@ -1,0 +1,4 @@
+standalone/*
+
+*.db
+*.log
