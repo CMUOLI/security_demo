@@ -1,6 +1,6 @@
 package edu.cmu.oli.secure.api;
 
-import edu.cmu.oli.secure.control.LearningActivityManager;
+import edu.cmu.oli.secure.control.QuestionManager;
 
 import javax.annotation.Resource;
 import javax.ejb.Stateless;
@@ -19,13 +19,13 @@ import java.util.logging.Logger;
  */
 @Stateless
 @Path("activity")
-public class LearningActivityResource {
+public class QuestionResource {
 
     @Inject
     Logger log;
 
     @Inject
-    private LearningActivityManager learningActivityManager;
+    private QuestionManager questionManager;
 
     @Resource
     private ManagedExecutorService mes;
@@ -33,32 +33,32 @@ public class LearningActivityResource {
     @GET
     @Path("all")
     public void all(@Suspended AsyncResponse response) {
-        CompletableFuture.supplyAsync(() -> learningActivityManager.all(), mes).exceptionally(this::handelExceptions).thenAccept(response::resume);
+        CompletableFuture.supplyAsync(() -> questionManager.all(), mes).exceptionally(this::handelExceptions).thenAccept(response::resume);
     }
 
     @GET
     @Path("find/{id}")
     public void findById(@Suspended AsyncResponse response, @PathParam("id") String id) {
-        CompletableFuture.supplyAsync(() -> learningActivityManager.findById(id), mes).exceptionally(this::handelExceptions).thenAccept(response::resume);
+        CompletableFuture.supplyAsync(() -> questionManager.findById(id), mes).exceptionally(this::handelExceptions).thenAccept(response::resume);
     }
 
     @DELETE
     @Path("delete/{id}")
     public void deleteById(@Suspended AsyncResponse response, @PathParam("id") String id) {
-        CompletableFuture.supplyAsync(() -> learningActivityManager.deleteById(id), mes).exceptionally(this::handelExceptions).thenAccept(response::resume);
+        CompletableFuture.supplyAsync(() -> questionManager.deleteById(id), mes).exceptionally(this::handelExceptions).thenAccept(response::resume);
     }
 
     @POST
     @Path("create")
     public void create(@Suspended AsyncResponse response, JsonObject body) {
-        CompletableFuture.supplyAsync(() -> learningActivityManager.create(body), mes).exceptionally(this::handelExceptions).thenAccept(response::resume);
+        CompletableFuture.supplyAsync(() -> questionManager.create(body), mes).exceptionally(this::handelExceptions).thenAccept(response::resume);
     }
 
     @PUT
     @Path("update/{id}")
     public void update(@Suspended AsyncResponse response,@PathParam("id") String id,
                         JsonObject body) {
-        CompletableFuture.supplyAsync(() -> learningActivityManager.update(id, body), mes).exceptionally(this::handelExceptions).thenAccept(response::resume);
+        CompletableFuture.supplyAsync(() -> questionManager.update(id, body), mes).exceptionally(this::handelExceptions).thenAccept(response::resume);
     }
 
     // Error handler
