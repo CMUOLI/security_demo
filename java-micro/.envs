@@ -1,0 +1,10 @@
+# MySQL configuration
+MYSQL_ROOT_PASSWORD=password
+MYSQL_USER=authz
+MYSQL_PASSWORD=password2
+MYSQL_DATABASE=template_db
+# Wildfly configuration
+adminuser=admin
+adminpass=Admin#70365
+managementport=9991
+serverport=8081
