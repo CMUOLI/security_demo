@@ -1,0 +1,35 @@
+version: '2.1'
+services:
+  java-micro:
+    build:
+      context: ./java-micro
+    image: demo/java-micro
+    container_name: java-demo2
+    env_file:
+      - ./java-micro/.envs
+    ports:
+     - "8081:8080"
+     - "9991:9990"
+    networks:
+     - service-tier
+  keycloak-sso:
+    image: jboss/keycloak-mysql
+    env_file:
+      - ./keycloak-mysql/mysql.envs
+    ports:
+      - "9081:8080"
+    networks:
+      - service-tier
+    depends_on:
+     - mysql-keycloak
+  mysql-keycloak:
+    image: mysql
+    env_file:
+      - ./keycloak-mysql/mysql.envs
+    volumes:
+      - /keycloak/db:/var/lib/mysql
+    networks:
+      - service-tier
+networks:
+  service-tier:
+    driver: bridge
