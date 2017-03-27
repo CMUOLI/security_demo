@@ -12,6 +12,7 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 
@@ -26,7 +27,8 @@ import java.util.Date;
 @NamedQueries({
         @NamedQuery(name = "CourseSection.findAll", query = "SELECT a FROM CourseSection a"),
         @NamedQuery(name = "CourseSection.findByGuid", query = "SELECT a FROM CourseSection a WHERE a.guid = :guid"),
-        @NamedQuery(name = "CourseSection.findByTitle", query = "SELECT a FROM CourseSection a WHERE a.id = :id"),
+        @NamedQuery(name = "CourseSection.findByAdmitCode", query = "SELECT a FROM CourseSection a WHERE a.admitCode = :admitCode"),
+        @NamedQuery(name = "CourseSection.findByTitle", query = "SELECT a FROM CourseSection a WHERE a.title = :title"),
         @NamedQuery(name = "CourseSection.findByCreated", query = "SELECT a FROM CourseSection a WHERE a.dateCreated = :dateCreated")})
 public class CourseSection implements Serializable {
 
@@ -75,4 +77,100 @@ public class CourseSection implements Serializable {
         this.dateUpdated = (Date) dateCreated.clone();
     }
 
+    public String getGuid() {
+        return guid;
+    }
+
+    public void setGuid(String guid) {
+        this.guid = guid;
+    }
+
+    public String getAdmitCode() {
+        return admitCode;
+    }
+
+    public void setAdmitCode(String admitCode) {
+        this.admitCode = admitCode;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public Date getDateCreated() {
+        return dateCreated;
+    }
+
+    public void setDateCreated(Date dateCreated) {
+        this.dateCreated = dateCreated;
+    }
+
+    public Date getDateUpdated() {
+        return dateUpdated;
+    }
+
+    public void setDateUpdated(Date dateUpdated) {
+        this.dateUpdated = dateUpdated;
+    }
+
+    public Collection<Question> getQuestions() {
+        return questions;
+    }
+
+    public void setQuestions(Collection<Question> questions) {
+        this.questions = questions;
+    }
+
+    public void addQuestion(Question question){
+        if(this.questions == null){
+            this.questions = new ArrayList<>();
+        }
+        this.questions.add(question);
+    }
+
+    public Collection<Registration> getRegistrations() {
+        return registrations;
+    }
+
+    public void setRegistrations(Collection<Registration> registrations) {
+        this.registrations = registrations;
+    }
+
+    public void addRegistration(Registration registration){
+        if(this.registrations == null){
+            this.registrations = new ArrayList<>();
+        }
+        this.registrations.add(registration);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        CourseSection that = (CourseSection) o;
+
+        if (guid != null ? !guid.equals(that.guid) : that.guid != null) return false;
+        return admitCode.equals(that.admitCode);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = guid != null ? guid.hashCode() : 0;
+        result = 31 * result + admitCode.hashCode();
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return "CourseSection{" +
+                "guid='" + guid + '\'' +
+                ", admitCode='" + admitCode + '\'' +
+                ", title='" + title + '\'' +
+                '}';
+    }
 }

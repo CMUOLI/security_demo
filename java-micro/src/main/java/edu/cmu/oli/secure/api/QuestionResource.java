@@ -1,5 +1,6 @@
 package edu.cmu.oli.secure.api;
 
+import com.google.gson.Gson;
 import edu.cmu.oli.secure.control.QuestionManager;
 
 import javax.annotation.Resource;
@@ -10,6 +11,8 @@ import javax.json.JsonObject;
 import javax.ws.rs.*;
 import javax.ws.rs.container.AsyncResponse;
 import javax.ws.rs.container.Suspended;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -62,10 +65,13 @@ public class QuestionResource {
     }
 
     // Error handler
-    private String handelExceptions(Throwable t) {
+    private Response handelExceptions(Throwable t) {
         String message = t.toString();
         log.log(Level.INFO, message);
-        return message;
+        Gson gson = new Gson();
+        com.google.gson.JsonObject je = new com.google.gson.JsonObject();
+        je.addProperty("messsage", message);
+        return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(gson.toJson(je)).type(MediaType.APPLICATION_JSON).build();
     }
 
 }
