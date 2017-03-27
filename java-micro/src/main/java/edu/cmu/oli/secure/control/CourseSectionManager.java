@@ -1,12 +1,26 @@
 package edu.cmu.oli.secure.control;
 
+import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
+import javax.json.Json;
 import javax.json.JsonObject;
+import javax.json.JsonWriter;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.TypedQuery;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Logger;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
+import edu.cmu.oli.secure.domain.CourseSection;
 import org.jboss.ejb3.annotation.SecurityDomain;
 
 /**
@@ -22,51 +36,86 @@ public class CourseSectionManager {
     @Inject
     Logger log;
 
-    @RolesAllowed("admin")
-    public String all(){
-
-        return " ";
+    public Response all() {
+        TypedQuery<CourseSection> q = em.createNamedQuery("CourseSection.findAll", CourseSection.class);
+        List<CourseSection> resultList = q.getResultList();
+        Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
+        String json = gson.toJson(resultList, new TypeToken<ArrayList<CourseSection>>() {
+        }.getType());
+        return Response.status(Response.Status.OK).entity(json).type(MediaType.APPLICATION_JSON).build();
     }
 
-    public String findById(String id){
-        return " ";
+    public Response findById(String id) {
+        CourseSection singleResult = findByGuid(id);
+        Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
+        if(singleResult == null) {
+            com.google.gson.JsonObject je = new com.google.gson.JsonObject();
+            je.addProperty("messsage", "CourseSection not found " + id);
+            return Response.status(Response.Status.NOT_FOUND).entity(gson.toJson(je)).type(MediaType.APPLICATION_JSON).build();
+        }
+        String json = gson.toJson(singleResult, new TypeToken<CourseSection>() {
+        }.getType());
+        return Response.status(Response.Status.OK).entity(json).type(MediaType.APPLICATION_JSON).build();
     }
 
-    public String deleteById(String id){
-        return " ";
+    private CourseSection findByGuid(String id) {
+        TypedQuery<CourseSection> q = em.createNamedQuery("CourseSection.findByGuid", CourseSection.class);
+        q.setParameter("guid", id);
+        return q.getSingleResult();
+    }
+    private CourseSection findByAdmitCode(String admitCode) {
+        TypedQuery<CourseSection> q = em.createNamedQuery("CourseSection.findByAdmitCode", CourseSection.class);
+        q.setParameter("admitCode", admitCode);
+        return q.getSingleResult();
     }
 
-    public String create(JsonObject body){
-        return " ";
+    public Response deleteById(String id) {
+        CourseSection singleResult = findByGuid(id);
+        Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
+        if(singleResult == null) {
+            com.google.gson.JsonObject je = new com.google.gson.JsonObject();
+            je.addProperty("messsage", "CourseSection not found");
+            return Response.status(Response.Status.NOT_FOUND).entity(gson.toJson(je)).type(MediaType.APPLICATION_JSON).build();
+        }
+        em.remove(singleResult);
+        com.google.gson.JsonObject je = new com.google.gson.JsonObject();
+        je.addProperty("messsage", "CourseSection deleted");
+        return Response.status(Response.Status.OK).entity(gson.toJson(je)).type(MediaType.APPLICATION_JSON).build();
     }
 
-    public String update(String id, JsonObject body){
-        return " ";
+    public Response create(JsonObject body) {
+        StringWriter stWriter = new StringWriter();
+        try (JsonWriter jsonWriter = Json.createWriter(stWriter)) {
+            jsonWriter.writeObject(body);
+        }
+        Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
+        CourseSection courseSection = gson.fromJson(stWriter.toString(), new TypeToken<CourseSection>() {
+        }.getType());
+        em.persist(courseSection);
+        com.google.gson.JsonObject je = new com.google.gson.JsonObject();
+        je.addProperty("messsage", "CourseSection created");
+        return Response.status(Response.Status.OK).entity(gson.toJson(je)).type(MediaType.APPLICATION_JSON).build();
     }
 
-//
-//    private String find(String query, Type type, String id, boolean delete) {
-//        Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
-//        Query q = em.createNamedQuery(query);
-//        if (id == null) {
-//            List results = q.getResultList();
-//            return gson.toJson(results, type);
-//        } else {
-//            q.setParameter("uniqueId", id);
-//            Object singleResult = q.getSingleResult();
-//            if (singleResult != null && delete) {
-//                em.remove(singleResult);
-//                return "deleted";
-//            }
-//            List results = new ArrayList();
-//            results.add(singleResult);
-//            return gson.toJson(results, type);
-//        }
-//    }
-//
-//    private Object findId(String query, String id) {
-//        Query q = em.createNamedQuery(query);
-//        q.setParameter("uniqueId", id);
-//        return q.getSingleResult();
-//    }
+    public Response update(String id, JsonObject body) {
+        StringWriter stWriter = new StringWriter();
+        try (JsonWriter jsonWriter = Json.createWriter(stWriter)) {
+            jsonWriter.writeObject(body);
+        }
+        Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
+        CourseSection courseSection = gson.fromJson(stWriter.toString(), new TypeToken<CourseSection>() {
+        }.getType());
+        CourseSection singleResult = findByGuid(id);
+        if(singleResult == null) {
+            com.google.gson.JsonObject je = new com.google.gson.JsonObject();
+            je.addProperty("messsage", "CourseSection not found");
+            return Response.status(Response.Status.NOT_FOUND).entity(gson.toJson(je)).type(MediaType.APPLICATION_JSON).build();
+        }
+        singleResult.setTitle(courseSection.getTitle());
+        singleResult.setAdmitCode(courseSection.getAdmitCode());
+        em.merge(singleResult);
+        com.google.gson.JsonObject je = new com.google.gson.JsonObject();
+        je.addProperty("messsage", "CourseSection updated");
+        return Response.status(Response.Status.OK).entity(gson.toJson(je)).type(MediaType.APPLICATION_JSON).build();
+    }
 }

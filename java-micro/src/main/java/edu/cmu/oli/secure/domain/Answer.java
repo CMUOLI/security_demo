@@ -24,7 +24,7 @@ import java.util.Date;
         @NamedQuery(name = "Registration.findAll", query = "SELECT a FROM Answer a"),
         @NamedQuery(name = "Registration.findByGuid", query = "SELECT a FROM Answer a WHERE a.guid = :guid"),
         @NamedQuery(name = "Registration.findByUserId", query = "SELECT a FROM Answer a WHERE a.userId = :userId"),
-        @NamedQuery(name = "Registration.findBySection", query = "SELECT a FROM Answer a WHERE a.courseSection = :courseSection")})
+        @NamedQuery(name = "Registration.findByQuestion", query = "SELECT a FROM Answer a WHERE a.question = :question")})
 public class Answer implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -39,11 +39,13 @@ public class Answer implements Serializable {
     private String guid;
 
     @Expose()
+    @NotNull
     @Size(max = 250)
     @Column(name = "user_id")
     private String userId;
 
     @Expose()
+    @NotNull
     @JoinColumn(name = "question_guid", referencedColumnName = "guid")
     @ManyToOne
     private Question question;
@@ -64,4 +66,63 @@ public class Answer implements Serializable {
         this.dateUpdated = (Date) dateCreated.clone();
     }
 
+    public String getGuid() {
+        return guid;
+    }
+
+    public void setGuid(String guid) {
+        this.guid = guid;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
+    public Question getQuestion() {
+        return question;
+    }
+
+    public void setQuestion(Question question) {
+        this.question = question;
+    }
+
+    public Date getDateCreated() {
+        return dateCreated;
+    }
+
+    public void setDateCreated(Date dateCreated) {
+        this.dateCreated = dateCreated;
+    }
+
+    public Date getDateUpdated() {
+        return dateUpdated;
+    }
+
+    public void setDateUpdated(Date dateUpdated) {
+        this.dateUpdated = dateUpdated;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Answer answer = (Answer) o;
+
+        if (!guid.equals(answer.guid)) return false;
+        if (userId != null ? !userId.equals(answer.userId) : answer.userId != null) return false;
+        return question != null ? question.equals(answer.question) : answer.question == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = guid.hashCode();
+        result = 31 * result + (userId != null ? userId.hashCode() : 0);
+        result = 31 * result + (question != null ? question.hashCode() : 0);
+        return result;
+    }
 }

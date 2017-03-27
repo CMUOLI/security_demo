@@ -39,15 +39,19 @@ public class Registration implements Serializable {
     private String guid;
 
     @Expose()
+    @NotNull
     @Size(max = 250)
     @Column(name = "user_id")
     private String userId;
 
     @Expose()
+    @NotNull
     @JoinColumn(name = "course_section_guid", referencedColumnName = "guid")
     @ManyToOne
     private CourseSection courseSection;
 
+    @Expose()
+    @NotNull
     @Enumerated(EnumType.STRING)
     @Column(name = "role")
     private Roles role;
@@ -68,4 +72,82 @@ public class Registration implements Serializable {
         this.dateUpdated = (Date) dateCreated.clone();
     }
 
+    public String getGuid() {
+        return guid;
+    }
+
+    public void setGuid(String guid) {
+        this.guid = guid;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
+    public CourseSection getCourseSection() {
+        return courseSection;
+    }
+
+    public void setCourseSection(CourseSection courseSection) {
+        this.courseSection = courseSection;
+    }
+
+    public Roles getRole() {
+        return role;
+    }
+
+    public void setRole(Roles role) {
+        this.role = role;
+    }
+
+    public Date getDateCreated() {
+        return dateCreated;
+    }
+
+    public void setDateCreated(Date dateCreated) {
+        this.dateCreated = dateCreated;
+    }
+
+    public Date getDateUpdated() {
+        return dateUpdated;
+    }
+
+    public void setDateUpdated(Date dateUpdated) {
+        this.dateUpdated = dateUpdated;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Registration that = (Registration) o;
+
+        if (guid != null ? !guid.equals(that.guid) : that.guid != null) return false;
+        if (!userId.equals(that.userId)) return false;
+        if (!courseSection.equals(that.courseSection)) return false;
+        return role == that.role;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = guid != null ? guid.hashCode() : 0;
+        result = 31 * result + userId.hashCode();
+        result = 31 * result + courseSection.hashCode();
+        result = 31 * result + role.hashCode();
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return "Registration{" +
+                "userId='" + userId + '\'' +
+                ", courseSection=" + courseSection +
+                ", role=" + role +
+                '}';
+    }
 }
