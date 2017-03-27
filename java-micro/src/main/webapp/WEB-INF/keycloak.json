@@ -1,7 +1,7 @@
 {
   "realm": "security_demo",
   "bearer-only": true,
-  "auth-server-url": "http://keycloak-sso:9081/auth",
+  "auth-server-url": "http://keycloak-sso:8080/auth",
   "ssl-required": "external",
   "resource": "java-micro",
   "credentials": {
