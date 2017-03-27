@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import edu.cmu.oli.secure.domain.*;
+import org.jboss.ejb3.annotation.SecurityDomain;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -25,6 +26,7 @@ import java.util.logging.Logger;
  * @author Raphael Gachuhi
  */
 @Stateless
+@SecurityDomain("keycloak")
 public class QuestionManager {
     @PersistenceContext
     EntityManager em;
