@@ -1,8 +1,12 @@
 {
-  "realm":"security_demo",
-  "auth-server-url": "http://localhost:9081/auth",
-  "realm_public_key":"MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAhvKP1i0TGpuN75ndYtLLeNCzkYtZlqQMQ1i8QL5MT/ECrW/zrVz7j9z3dEzpmHH/fM0OFNDdIbaVrO2fq7nymf7sIBSsofZWQScpdTPu6i5AWKDXnLNK4cgFjptQjmNrsaWVCq15QPDryywrlQHN3MC4EZnN8/cQD1WgblEw1R9Bd2eY0/10DEHMxvUchL4IFjIPgJHrXOdMXAeZAO1Uiyhp73HPfO+h9AxmzCTEXMzHuEj3NYSfGbUl3e7TqhISWUxgZBzgMbNvMp57Wc5A2ZhgpAxztY46cTqWISrXSII/mAzl0/JHHqN4U2qbXR40B+gzutBsLvONxC/48oIfDQIDAQAB",
-  "ssl-required": "none",
+  "realm": "security_demo",
   "bearer-only": true,
-  "resource": "java-micro"
+  "auth-server-url": "http://keycloak-sso:9081/auth",
+  "ssl-required": "external",
+  "resource": "java-micro",
+  "credentials": {
+    "secret": "7c5ee7e4-a49b-43d1-a1de-d5a3fa5cf37a"
+  },
+  "use-resource-role-mappings": true,
+  "policy-enforcer": {}
 }

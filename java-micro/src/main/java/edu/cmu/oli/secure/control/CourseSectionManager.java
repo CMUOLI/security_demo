@@ -37,12 +37,17 @@ public class CourseSectionManager {
     Logger log;
 
     public Response all() {
-        TypedQuery<CourseSection> q = em.createNamedQuery("CourseSection.findAll", CourseSection.class);
-        List<CourseSection> resultList = q.getResultList();
-        Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
-        String json = gson.toJson(resultList, new TypeToken<ArrayList<CourseSection>>() {
-        }.getType());
-        return Response.status(Response.Status.OK).entity(json).type(MediaType.APPLICATION_JSON).build();
+//        TypedQuery<CourseSection> q = em.createNamedQuery("CourseSection.findAll", CourseSection.class);
+//        List<CourseSection> resultList = q.getResultList();
+//        Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
+//        String json = gson.toJson(resultList, new TypeToken<ArrayList<CourseSection>>() {
+//        }.getType());
+//
+//        return Response.status(Response.Status.OK).entity(json).type(MediaType.APPLICATION_JSON).build();
+        Gson gson = new Gson();
+        com.google.gson.JsonObject je = new com.google.gson.JsonObject();
+        je.addProperty("messsage", "Test Worked yeeaiii");
+        return Response.status(Response.Status.OK).entity(gson.toJson(je)).type(MediaType.APPLICATION_JSON).build();
     }
 
     public Response findById(String id) {
