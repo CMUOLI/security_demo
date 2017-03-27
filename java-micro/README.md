@@ -27,9 +27,7 @@ the command above
 
 ```
 $cd ../
-```
 
-```
 $ docker-compose build
 ```
 
