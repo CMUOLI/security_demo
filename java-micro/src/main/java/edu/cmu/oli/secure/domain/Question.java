@@ -10,23 +10,26 @@ import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 
 /**
  * @author Raphael Gachuhi
  */
 @Entity
-@Table(name = "learning_activity")
+@Table(name = "question")
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
 @NamedQueries({
-        @NamedQuery(name = "LearningActivity.findAll", query = "SELECT a FROM LearningActivity a"),
-        @NamedQuery(name = "LearningActivity.findByGuid", query = "SELECT a FROM LearningActivity a WHERE a.guid = :guid"),
-        @NamedQuery(name = "LearningActivity.findByName", query = "SELECT a FROM LearningActivity a WHERE a.id = :id"),
-        @NamedQuery(name = "LearningActivity.findByDescription", query = "SELECT a FROM LearningActivity a WHERE a.description = :description"),
-        @NamedQuery(name = "LearningActivity.findByCreated", query = "SELECT a FROM LearningActivity a WHERE a.created = :created")})
-public class LearningActivity implements Serializable {
+        @NamedQuery(name = "Question.findAll", query = "SELECT a FROM Question a"),
+        @NamedQuery(name = "Question.findByGuid", query = "SELECT a FROM Question a WHERE a.guid = :guid"),
+        @NamedQuery(name = "Question.findByName", query = "SELECT a FROM Question a WHERE a.id = :id"),
+        @NamedQuery(name = "Question.findByPrompt", query = "SELECT a FROM Question a WHERE a.prompt = :prompt"),
+        @NamedQuery(name = "Question.findByCreated", query = "SELECT a FROM Question a WHERE a.dateCreated = :created")})
+public class Question implements Serializable {
 
     private static final long serialVersionUID = 1L;
     @Expose()
@@ -57,8 +60,8 @@ public class LearningActivity implements Serializable {
 
     @Expose()
     @Size(max = 250)
-    @Column(name = "description")
-    private String description;
+    @Column(name = "prompt")
+    private String prompt;
 
     @Expose()
     @Size(max = 250)
@@ -79,12 +82,16 @@ public class LearningActivity implements Serializable {
     @UpdateTimestamp
     private Date dateUpdated;
 
+    @XmlTransient
+    @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Collection<Answer> answers;
+
     @Expose()
     @JoinColumn(name = "course_section_guid", referencedColumnName = "guid")
     @ManyToOne
     private CourseSection courseSection;
 
-    public LearningActivity() {
+    public Question() {
         this.dateCreated = new Date();
         this.dateUpdated = (Date) dateCreated.clone();
     }
@@ -105,12 +112,12 @@ public class LearningActivity implements Serializable {
         this.id = id;
     }
 
-    public String getDescription() {
-        return description;
+    public String getPrompt() {
+        return prompt;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
+    public void setPrompt(String description) {
+        this.prompt = description;
     }
 
     public Date getDateCreated() {
@@ -161,15 +168,38 @@ public class LearningActivity implements Serializable {
         this.dateUpdated = dateUpdated;
     }
 
+    public Collection<Answer> getAnswers() {
+        return answers;
+    }
+
+    public void setAnswers(Collection<Answer> answers) {
+        this.answers = answers;
+    }
+
+    public void addAnswer(Answer answer) {
+        if (this.answers == null) {
+            this.answers = new ArrayList<>();
+        }
+        this.answers.add(answer);
+    }
+
+    public CourseSection getCourseSection() {
+        return courseSection;
+    }
+
+    public void setCourseSection(CourseSection courseSection) {
+        this.courseSection = courseSection;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        LearningActivity learningActivity = (LearningActivity) o;
+        Question question = (Question) o;
 
-        if (!guid.equals(learningActivity.guid)) return false;
-        return id.equals(learningActivity.id);
+        if (!guid.equals(question.guid)) return false;
+        return id.equals(question.id);
     }
 
     @Override
@@ -181,7 +211,7 @@ public class LearningActivity implements Serializable {
 
     @Override
     public String toString() {
-        return "LearningActivity[ guid=" + guid + " ]";
+        return "Question[ guid=" + guid + " ]";
     }
 
 }

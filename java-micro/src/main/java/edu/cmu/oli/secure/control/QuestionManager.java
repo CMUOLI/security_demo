@@ -25,7 +25,7 @@ import java.util.logging.Logger;
  * @author Raphael Gachuhi
  */
 @Stateless
-public class LearningActivityManager {
+public class QuestionManager {
     @PersistenceContext
     EntityManager em;
 
