@@ -21,10 +21,10 @@ import java.util.Date;
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
 @NamedQueries({
-        @NamedQuery(name = "Registration.findAll", query = "SELECT a FROM Answer a"),
-        @NamedQuery(name = "Registration.findByGuid", query = "SELECT a FROM Answer a WHERE a.guid = :guid"),
-        @NamedQuery(name = "Registration.findByUserId", query = "SELECT a FROM Answer a WHERE a.userId = :userId"),
-        @NamedQuery(name = "Registration.findByQuestion", query = "SELECT a FROM Answer a WHERE a.question = :question")})
+        @NamedQuery(name = "Answer.findAll", query = "SELECT a FROM Answer a"),
+        @NamedQuery(name = "Answer.findByGuid", query = "SELECT a FROM Answer a WHERE a.guid = :guid"),
+        @NamedQuery(name = "Answer.findByUserId", query = "SELECT a FROM Answer a WHERE a.userId = :userId"),
+        @NamedQuery(name = "Answer.findByQuestion", query = "SELECT a FROM Answer a WHERE a.question = :question")})
 public class Answer implements Serializable {
 
     private static final long serialVersionUID = 1L;

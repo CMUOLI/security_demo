@@ -4,6 +4,8 @@ ENV DEPLOYMENT_DIR ${JBOSS_HOME}/standalone/deployments/
 ADD execute.sh ${JBOSS_HOME}/
 USER root
 RUN chmod +x ${JBOSS_HOME}/execute.sh
+ADD wait-for-it.sh /opt/
+RUN chmod +x /opt/wait-for-it.sh
 USER jboss
 RUN cd $JBOSS_HOME \
     && curl -O https://downloads.jboss.org/keycloak/3.0.0.Final/adapters/keycloak-oidc/keycloak-wildfly-adapter-dist-3.0.0.Final.tar.gz \

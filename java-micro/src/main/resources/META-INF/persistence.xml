@@ -4,14 +4,13 @@
              xsi:schemaLocation="
         http://xmlns.jcp.org/xml/ns/persistence
         http://xmlns.jcp.org/xml/ns/persistence/persistence_2_1.xsd">
-    <persistence-unit id="secure-ejbPU" transaction-type="JTA">
-        <jta-data-source>java:jboss/datasources/TestDS</jta-data-source>
-        <properties>
-            <property id="hibernate.hbm2ddl.auto" value="create-drop"/>
-            <property id="hibernate.show_sql" value="false"/>
-            <property id="hibernate.format_sql" value="false"/>
-            <property id="hibernate.use_sql_comments" value="false"/>
-        </properties>
-    </persistence-unit>
+<persistence-unit name="secure-ejbPU" transaction-type="JTA">
+    <jta-data-source>java:jboss/datasources/ExampleDS</jta-data-source>
+    <properties>
+        <property name="hibernate.hbm2ddl.auto" value="create-drop"/>
+        <property name="hibernate.show_sql" value="false"/>
+        <property name="hibernate.format_sql" value="false"/>
+        <property name="hibernate.use_sql_comments" value="false"/>
+    </properties>
+</persistence-unit>
 </persistence>
-

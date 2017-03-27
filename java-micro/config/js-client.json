@@ -1,0 +1,12 @@
+{
+  "clientId": "java-js-client",
+  "rootUrl": "http://localhost:63342/secure/src/main/webapp/",
+  "enabled": true,
+  "redirectUris": [
+    "http://localhost:63342/secure/src/main/webapp/*"
+  ],
+  "webOrigins": [
+    "http://localhost:63342"
+  ],
+  "publicClient": true
+}

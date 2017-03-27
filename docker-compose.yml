@@ -8,10 +8,13 @@ services:
     env_file:
       - ./java-micro/.envs
     ports:
-     - "8081:8080"
-     - "9991:9990"
+     - "63344:8080"
+     - "63345:9990"
     networks:
      - service-tier
+    depends_on:
+     - keycloak-sso
+    command: ["/opt/wait-for-it.sh", "keycloak-sso:9081", "--", "echo", "keycloak started"]
   keycloak-sso:
     image: jboss/keycloak-mysql
     env_file:
