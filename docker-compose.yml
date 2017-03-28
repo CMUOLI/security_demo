@@ -17,7 +17,7 @@ services:
     #command: ["/opt/wait-for-it.sh", "keycloak-sso:8080", "--", "echo", "keycloak started"]
   keycloak-sso:
     build:
-      context: ./java-micro
+      context: ./keycloak-mysql
     image: demo/keycloak-mysql
     container_name: keycloak-demo2
     env_file:
