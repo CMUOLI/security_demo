@@ -6,6 +6,7 @@ import com.google.gson.reflect.TypeToken;
 import edu.cmu.oli.secure.domain.Registration;
 import org.jboss.ejb3.annotation.SecurityDomain;
 
+import javax.annotation.security.PermitAll;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.json.Json;
@@ -33,6 +34,7 @@ public class RegistrationManager {
     @Inject
     Logger log;
 
+    @PermitAll
     public Response all() {
         TypedQuery<Registration> q = em.createNamedQuery("Registration.findAll", Registration.class);
         List<Registration> resultList = q.getResultList();

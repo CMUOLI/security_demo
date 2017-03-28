@@ -36,6 +36,7 @@ public class CourseSectionManager {
     @Inject
     Logger log;
 
+    @PermitAll
     public Response all() {
 //        TypedQuery<CourseSection> q = em.createNamedQuery("CourseSection.findAll", CourseSection.class);
 //        List<CourseSection> resultList = q.getResultList();

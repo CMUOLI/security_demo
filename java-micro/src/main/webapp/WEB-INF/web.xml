@@ -10,7 +10,7 @@
             <url-pattern>/resources/*</url-pattern>
         </web-resource-collection>
         <auth-constraint>
-            <role-name>student</role-name>
+            <role-name>user</role-name>
         </auth-constraint>
     </security-constraint>
 
@@ -19,7 +19,7 @@
     </login-config>
 
     <security-role>
-        <role-name>student</role-name>
+        <role-name>user</role-name>
     </security-role>
 
 </web-app>
