@@ -3,37 +3,46 @@ services:
   java-micro:
     build:
       context: ./java-micro
-    image: demo/java-micro
-    container_name: java-demo2
+    image: java-micro
+    container_name: java
     env_file:
       - ./java-micro/.envs
     ports:
-      - "63344:8080"
-      - "63345:9990"
+      - "8081:8080"
+      - "8082:9990"
     networks:
       - service-tier
     depends_on:
       - keycloak-sso
-    #command: ["/opt/wait-for-it.sh", "keycloak-sso:8080", "--", "echo", "keycloak started"]
   keycloak-sso:
     build:
       context: ./keycloak-mysql
-    image: demo/keycloak-mysql
-    container_name: keycloak-demo2
+    image: keycloak-mysql
+    container_name: keycloak
     env_file:
       - ./keycloak-mysql/mysql.envs
     ports:
-      - "9081:8080"
+      - "8080:8080"
     networks:
       - service-tier
     depends_on:
      - mysql-keycloak
   mysql-keycloak:
     image: mysql
+    container_name: mysql-keycloak
     env_file:
       - ./keycloak-mysql/mysql.envs
     volumes:
       - /keycloak/db:/var/lib/mysql
+    networks:
+      - service-tier
+  django-micro:
+    build:
+      context: ./django_micro_keycloak_oidc
+    image: django-micro
+    container_name: django
+    ports:
+      - "8083:8000"
     networks:
       - service-tier
 networks:
