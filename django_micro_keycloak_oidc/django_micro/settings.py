@@ -49,7 +49,7 @@ AUTHENTICATION_BACKENDS = (
 
 auth_uri = "https://stormwind.oli.cmu.edu/auth/realms/django"
 client_id = "django"
-public_uri = "http://localhost:8083/"
+public_uri = "https://stormwind.oli.cmu.edu/"
 
 from bossoidc.settings import *
 configure_oidc(auth_uri, client_id, public_uri)
@@ -57,8 +57,8 @@ configure_oidc(auth_uri, client_id, public_uri)
 OIDC_DYNAMIC_CLIENT_REGISTRATION_DATA = {
     "application_type": "web",
     "contacts": ["onlinecloudcomputingcourse@gmail.com"],
-    "redirect_uris": ["http://localhost:8083/openid/callback/login"],
-    "post_logout_redirect_uris": ["http://localhost:8083/openid/callback/logout"]
+    "redirect_uris": ["https://stormwind.oli.cmu.edu/openid/callback/login"],
+    "post_logout_redirect_uris": ["https://stormwind.oli.cmu.edu/openid/callback/logout"]
 }
 
 OIDC_DEFAULT_BEHAVIOUR = {
@@ -72,8 +72,8 @@ OIDC_PROVIDERS = {
         "behaviour": OIDC_DEFAULT_BEHAVIOUR,
         "client_registration": {
             "client_id": "django",
-            "redirect_uris": ["http://localhost:8083/openid/callback/login"],
-            "post_logout_redirect_uris": ["http://localhost:8083/openid/callback/logout"],
+            "redirect_uris": ["https://stormwind.oli.cmu.edu/openid/callback/login"],
+            "post_logout_redirect_uris": ["https://stormwind.oli.cmu.edu/openid/callback/logout"],
         }
     }
 }
