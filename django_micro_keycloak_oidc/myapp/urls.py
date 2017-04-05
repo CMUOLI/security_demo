@@ -3,7 +3,7 @@ from . import views
 
 urlpatterns = [
     url(r'^$', views.index, name='index'),
-    url(r'^secure$', views.secure, name='secure'),
+    url(r'^secureme$', views.secureme, name='secureme'),
 ]
 
 # from django.contrib.auth.decorators import login_required
