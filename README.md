@@ -18,5 +18,5 @@ You may have to create a directory named `/keycloak/db` in the root of your loca
 ---
 
 ***Authors***
-- [CMU OLI](https://github.com/CMUOLI/security_demo)
+- [CMU OLI](https://github.com/CMUOLI)
 - [CMUCC](https://github.com/cloudcomputingcourse)
