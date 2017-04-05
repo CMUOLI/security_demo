@@ -1,5 +1,5 @@
 django==1.10
--e git+https://github.com/CloudComputingCourse/pyoidc.git#egg=oiccmucc
+oic>=0.7.6
 -e git+https://github.com/CloudComputingCourse/django-oidc.git#egg=django-oidc-cmucc
 -e git+https://github.com/CloudComputingCourse/drf-oidc-auth.git#egg=drf-oidc-auth-cmucc
 -e git+https://github.com/CloudComputingCourse/boss-oidc.git#egg=boss-oidc-cmucc
