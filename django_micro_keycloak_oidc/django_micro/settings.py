@@ -72,6 +72,7 @@ OIDC_PROVIDERS = {
         "behaviour": OIDC_DEFAULT_BEHAVIOUR,
         "client_registration": {
             "client_id": "django",
+            "client_secret": os.environ['client_secret'],
             "redirect_uris": ["https://stormwind.oli.cmu.edu/openid/callback/login"],
             "post_logout_redirect_uris": ["https://stormwind.oli.cmu.edu/openid/callback/logout"],
         }
