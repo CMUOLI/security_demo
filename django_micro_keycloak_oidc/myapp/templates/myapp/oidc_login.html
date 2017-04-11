@@ -1,0 +1,7 @@
+{% if user.is_authenticated %}
+	{{ user }} has logged in! Now <a href="/openid/logout">Logout</a>
+	<br>
+	{{ user }} has permissions: {{ perms.myapp }}
+{% else %}
+	Uh oh ...
+{% endif %}
