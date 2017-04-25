@@ -33,10 +33,6 @@ import java.util.*;
 public class ApiUtil {
     public static final String MICRO_SERVICE = "java-micro";
     public static final String REALM = "security_demo";
-    public static final String ADMIN_ROLE = "admin";
-    public static final String INSTRUCTOR = "instructor";
-    public static final String STUDENT = "student";
-
 
     private static Logger log = LoggerFactory.getLogger(ApiUtil.class);
     private static AuthzClient authzClient;
@@ -148,7 +144,7 @@ public class ApiUtil {
         log.info(existing.toString());
     }
 
-    public static Set<String> introspectRequestingPartyToken(String accessToken, String filter, String scope) {
+    public static List<Permission> introspectRequestingPartyToken(String accessToken, String filter) {
 
         AuthzClient authzClient = ApiUtil.getAuthzClient();
 
@@ -191,12 +187,8 @@ public class ApiUtil {
         List<Permission> permissions = requestingPartyToken.getPermissions();
         for (Permission granted : permissions) {
             log.info(granted.toString());
-            if (granted.getScopes().contains(scope)) {
-                resourceNames.add(granted.getResourceSetName());
-                log.info(granted.getResourceSetName());
-            }
         }
-        return resourceNames;
+        return permissions;
     }
 
     private static List<Permission> obtainEntitlementsForResource(String resourceName, String accessToken) {
