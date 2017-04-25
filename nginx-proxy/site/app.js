@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 var keycloak = new Keycloak();
-var serviceUrl = 'http://localhost:63344/secure'
+var serviceUrl = 'http://128.237.188.141:8081/secure'
 
 function notAuthenticated() {
     document.getElementById('not-authenticated').style.display = 'block';
@@ -28,11 +28,12 @@ function authenticated() {
     document.getElementById('message').innerHTML = 'User: ' + keycloak.tokenParsed['preferred_username'];
 }
 
-function request(endpoint) {
-    var req = function() {
+function request(method, endpoint, contentType, data) {
+    var req = function () {
         var req = new XMLHttpRequest();
         var output = document.getElementById('message');
-        req.open('GET', serviceUrl + '/' + endpoint, true);
+        req.open(method, serviceUrl + '/' + endpoint, true);
+        req.setRequestHeader("Content-Type", contentType);
 
         if (keycloak.authenticated) {
             req.setRequestHeader('Authorization', 'Bearer ' + keycloak.token);
@@ -49,8 +50,11 @@ function request(endpoint) {
                 }
             }
         };
-
-        req.send();
+        if (data) {
+            req.send(JSON.stringify(data));
+        } else {
+            req.send();
+        }
     };
 
     if (keycloak.authenticated) {
@@ -61,7 +65,7 @@ function request(endpoint) {
 }
 
 window.onload = function () {
-    keycloak.init({ onLoad: 'check-sso', checkLoginIframeInterval: 1 }).success(function () {
+    keycloak.init({onLoad: 'check-sso', checkLoginIframeInterval: 1}).success(function () {
         if (keycloak.authenticated) {
             authenticated();
         } else {

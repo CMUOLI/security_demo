@@ -1,6 +1,7 @@
 package edu.cmu.oli.secure.logging;
 
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.InjectionPoint;
 
@@ -10,9 +11,9 @@ import javax.enterprise.inject.spi.InjectionPoint;
 public class LoggerExposer {
 
     @Produces
-    public Logger expose(InjectionPoint ip) {
-        String loggerName = ip.getMember().getDeclaringClass().getName();
-        return Logger.getLogger(loggerName);
+    @Logging
+    public Logger produceAuthnLog(InjectionPoint injectionPoint) {
+        return LoggerFactory.getLogger(injectionPoint.getMember().getDeclaringClass().getName());
     }
 
 }
