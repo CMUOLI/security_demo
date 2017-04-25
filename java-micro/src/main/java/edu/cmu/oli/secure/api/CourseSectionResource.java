@@ -3,8 +3,11 @@ package edu.cmu.oli.secure.api;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
+import edu.cmu.oli.secure.ResourceException;
 import edu.cmu.oli.secure.domain.CourseSection;
 import edu.cmu.oli.secure.logging.Logging;
+import org.keycloak.KeycloakSecurityContext;
+import org.keycloak.representations.idm.authorization.Permission;
 import org.slf4j.Logger;
 
 import javax.annotation.Resource;
@@ -25,8 +28,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -73,11 +75,19 @@ public class CourseSectionResource {
 
     @PUT
     @Path("{id}")
-    public void update(@Suspended AsyncResponse response,@PathParam("id") String id, JsonObject body) {
+    public void update(@Suspended AsyncResponse response, @PathParam("id") String id, JsonObject body) {
         CompletableFuture.supplyAsync(() -> doUpdate(id, body), mes).exceptionally(ApiUtil::handelExceptions).thenAccept(response::resume);
     }
 
     public Response doAll() {
+        KeycloakSecurityContext session = (KeycloakSecurityContext) httpServletRequest.getAttribute(KeycloakSecurityContext.class.getName());
+        String accessToken = session == null ? null : session.getTokenString();
+        Set<String> realmRoles = session == null ? null : session.getToken().getRealmAccess().getRoles();
+        // Allow only Instructors and Admins to fetch all sections
+        if (accessToken == null || realmRoles == null ||Collections.disjoint(realmRoles, Arrays.asList(Roles.INSTRUCTOR_ROLE, Roles.ADMIN_ROLE))) {
+            String message = "Not Logged In";
+            throw new ResourceException(Response.Status.FORBIDDEN, null, message);
+        }
         TypedQuery<CourseSection> q = em.createNamedQuery("CourseSection.findAll", CourseSection.class);
         List<CourseSection> resultList = q.getResultList();
         Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
@@ -92,9 +102,16 @@ public class CourseSectionResource {
     }
 
     public Response doFindById(String id) {
+        if(id == null){
+            String message = "Parameters missing";
+            throw new ResourceException(Response.Status.BAD_REQUEST, null, message);
+        }
+        // Allow only users with permissions for this section to fetch it
+        Set<String> strings = courseSectionScopes(id);
+
         CourseSection singleResult = doFindByGuid(id);
         Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
-        if(singleResult == null) {
+        if (singleResult == null) {
             com.google.gson.JsonObject je = new com.google.gson.JsonObject();
             je.addProperty("messsage", "CourseSection not found " + id);
             return Response.status(Response.Status.NOT_FOUND).entity(gson.toJson(je)).type(MediaType.APPLICATION_JSON).build();
@@ -104,21 +121,17 @@ public class CourseSectionResource {
         return Response.status(Response.Status.OK).entity(json).type(MediaType.APPLICATION_JSON).build();
     }
 
-    private CourseSection doFindByGuid(String id) {
-        TypedQuery<CourseSection> q = em.createNamedQuery("CourseSection.findByGuid", CourseSection.class);
-        q.setParameter("guid", id);
-        return q.getSingleResult();
-    }
-    private CourseSection findByAdmitCode(String admitCode) {
-        TypedQuery<CourseSection> q = em.createNamedQuery("CourseSection.findByAdmitCode", CourseSection.class);
-        q.setParameter("admitCode", admitCode);
-        return q.getSingleResult();
-    }
-
     public Response doDeleteById(String id) {
+        if(id == null){
+            String message = "Parameters missing";
+            throw new ResourceException(Response.Status.BAD_REQUEST, null, message);
+        }
+        // Allow all admins and any instructor with permissions for this section to delete it
+        Set<String> strings = courseSectionScopes(id, Roles.ADMIN_ROLE, Roles.INSTRUCTOR_ROLE);
+
         CourseSection singleResult = doFindByGuid(id);
         Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
-        if(singleResult == null) {
+        if (singleResult == null) {
             com.google.gson.JsonObject je = new com.google.gson.JsonObject();
             je.addProperty("messsage", "CourseSection not found");
             return Response.status(Response.Status.NOT_FOUND).entity(gson.toJson(je)).type(MediaType.APPLICATION_JSON).build();
@@ -130,6 +143,18 @@ public class CourseSectionResource {
     }
 
     public Response doCreate(JsonObject body) {
+        if(body == null){
+            String message = "Parameters missing";
+            throw new ResourceException(Response.Status.BAD_REQUEST, null, message);
+        }
+        KeycloakSecurityContext session = (KeycloakSecurityContext) httpServletRequest.getAttribute(KeycloakSecurityContext.class.getName());
+        String accessToken = session == null ? null : session.getTokenString();
+        Set<String> realmRoles = session == null ? null : session.getToken().getRealmAccess().getRoles();
+        // Allow only Instructors and Admins to create sections
+        if (accessToken == null || realmRoles == null ||Collections.disjoint(realmRoles, Arrays.asList(Roles.INSTRUCTOR_ROLE, Roles.ADMIN_ROLE))) {
+            String message = "Not Logged In";
+            throw new ResourceException(Response.Status.FORBIDDEN, null, message);
+        }
         StringWriter stWriter = new StringWriter();
         try (JsonWriter jsonWriter = Json.createWriter(stWriter)) {
             jsonWriter.writeObject(body);
@@ -144,6 +169,13 @@ public class CourseSectionResource {
     }
 
     public Response doUpdate(String id, JsonObject body) {
+        if(id == null || body == null){
+            String message = "Parameters missing";
+            throw new ResourceException(Response.Status.BAD_REQUEST, null, message);
+        }
+        // Allow all admins and any instructor with right permissions for this section to update it
+        Set<String> strings = courseSectionScopes(id, Roles.ADMIN_ROLE, Roles.INSTRUCTOR_ROLE);
+
         StringWriter stWriter = new StringWriter();
         try (JsonWriter jsonWriter = Json.createWriter(stWriter)) {
             jsonWriter.writeObject(body);
@@ -152,7 +184,7 @@ public class CourseSectionResource {
         CourseSection courseSection = gson.fromJson(stWriter.toString(), new TypeToken<CourseSection>() {
         }.getType());
         CourseSection singleResult = doFindByGuid(id);
-        if(singleResult == null) {
+        if (singleResult == null) {
             com.google.gson.JsonObject je = new com.google.gson.JsonObject();
             je.addProperty("messsage", "CourseSection not found");
             return Response.status(Response.Status.NOT_FOUND).entity(gson.toJson(je)).type(MediaType.APPLICATION_JSON).build();
@@ -163,5 +195,42 @@ public class CourseSectionResource {
         com.google.gson.JsonObject je = new com.google.gson.JsonObject();
         je.addProperty("messsage", "CourseSection updated");
         return Response.status(Response.Status.OK).entity(gson.toJson(je)).type(MediaType.APPLICATION_JSON).build();
+    }
+
+    private CourseSection doFindByGuid(String id) {
+        TypedQuery<CourseSection> q = em.createNamedQuery("CourseSection.findByGuid", CourseSection.class);
+        q.setParameter("guid", id);
+        return q.getSingleResult();
+    }
+
+    private CourseSection findByAdmitCode(String admitCode) {
+        TypedQuery<CourseSection> q = em.createNamedQuery("CourseSection.findByAdmitCode", CourseSection.class);
+        q.setParameter("admitCode", admitCode);
+        return q.getSingleResult();
+    }
+
+    private Set<String> courseSectionScopes(String sectionGuid, String... roles) {
+        KeycloakSecurityContext session = (KeycloakSecurityContext) httpServletRequest.getAttribute(KeycloakSecurityContext.class.getName());
+        String accessToken = session == null ? null : session.getTokenString();
+        Set<String> realmRoles = session == null ? null : session.getToken().getRealmAccess().getRoles();
+        if (accessToken == null || realmRoles == null || (roles.length>0 && Collections.disjoint(realmRoles, Arrays.asList(roles)))) {
+            String message = "Not Logged In";
+            throw new ResourceException(Response.Status.FORBIDDEN, null, message);
+        }
+        Set<String> scopes = new HashSet<>();
+        if (realmRoles.contains(Roles.ADMIN_ROLE)) {
+            scopes.add(Scopes.ADMINISTER_ACTION);
+        }
+        List<Permission> permissions = ApiUtil.introspectRequestingPartyToken(accessToken, "type=urn:java-micro:resources:course-section");
+        for (Permission granted : permissions) {
+            if (granted.getResourceSetName().equalsIgnoreCase(sectionGuid)) {
+                scopes.addAll(granted.getScopes());
+            }
+        }
+        if (scopes.isEmpty()) {
+            String message = "Not authorized";
+            throw new ResourceException(Response.Status.FORBIDDEN, null, message);
+        }
+        return scopes;
     }
 }
