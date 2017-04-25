@@ -6,5 +6,5 @@ MYSQL_DATABASE=template_db
 # Wildfly configuration
 adminuser=admin
 adminpass=Admin#70365
-managementport=63345
-serverport=63344
+managementport=9110
+serverport=8081

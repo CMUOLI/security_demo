@@ -52,9 +52,8 @@ public class Registration implements Serializable {
 
     @Expose()
     @NotNull
-    @Enumerated(EnumType.STRING)
     @Column(name = "role")
-    private Roles role;
+    private String scope;
 
     @Expose()
     @Column(name = "date_created")
@@ -96,12 +95,12 @@ public class Registration implements Serializable {
         this.courseSection = courseSection;
     }
 
-    public Roles getRole() {
-        return role;
+    public String getScope() {
+        return scope;
     }
 
-    public void setRole(Roles role) {
-        this.role = role;
+    public void setScope(String role) {
+        this.scope = role;
     }
 
     public Date getDateCreated() {
@@ -130,7 +129,7 @@ public class Registration implements Serializable {
         if (guid != null ? !guid.equals(that.guid) : that.guid != null) return false;
         if (!userId.equals(that.userId)) return false;
         if (!courseSection.equals(that.courseSection)) return false;
-        return role == that.role;
+        return scope == that.scope;
     }
 
     @Override
@@ -138,7 +137,7 @@ public class Registration implements Serializable {
         int result = guid != null ? guid.hashCode() : 0;
         result = 31 * result + userId.hashCode();
         result = 31 * result + courseSection.hashCode();
-        result = 31 * result + role.hashCode();
+        result = 31 * result + scope.hashCode();
         return result;
     }
 
@@ -147,7 +146,7 @@ public class Registration implements Serializable {
         return "Registration{" +
                 "userId='" + userId + '\'' +
                 ", courseSection=" + courseSection +
-                ", role=" + role +
+                ", role=" + scope +
                 '}';
     }
 }

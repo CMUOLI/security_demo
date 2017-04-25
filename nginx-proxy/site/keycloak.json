@@ -1,6 +1,6 @@
 {
   "realm": "security_demo",
-  "auth-server-url": "http://localhost:9081/auth",
+  "auth-server-url": "http://128.237.188.141:8080/auth",
   "ssl-required": "external",
   "resource": "java-js-client",
   "public-client": true
