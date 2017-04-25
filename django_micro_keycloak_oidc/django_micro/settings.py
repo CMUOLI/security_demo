@@ -47,9 +47,9 @@ AUTHENTICATION_BACKENDS = (
     'bossoidc.backend.OpenIdConnectBackend',
 )
 
-auth_uri = "https://stormwind.oli.cmu.edu/auth/realms/django"
-client_id = "django"
-public_uri = "https://stormwind.oli.cmu.edu/"
+auth_uri = "https://stormwind.oli.cmu.edu/auth/realms/tpz_prod"
+client_id = "tpz"
+public_uri = "http://localhost:8083/"
 
 from bossoidc.settings import *
 configure_oidc(auth_uri, client_id, public_uri)
@@ -57,8 +57,8 @@ configure_oidc(auth_uri, client_id, public_uri)
 OIDC_DYNAMIC_CLIENT_REGISTRATION_DATA = {
     "application_type": "web",
     "contacts": ["onlinecloudcomputingcourse@gmail.com"],
-    "redirect_uris": ["https://stormwind.oli.cmu.edu/openid/callback/login"],
-    "post_logout_redirect_uris": ["https://stormwind.oli.cmu.edu/openid/callback/logout"]
+    "redirect_uris": ["http://localhost:8083/openid/callback/login"],
+    "post_logout_redirect_uris": ["http://localhost:8083/openid/callback/logout"]
 }
 
 OIDC_DEFAULT_BEHAVIOUR = {
@@ -68,13 +68,13 @@ OIDC_DEFAULT_BEHAVIOUR = {
 
 OIDC_PROVIDERS = {
     "KeyCloak": {
-        "srv_discovery_url": "https://stormwind.oli.cmu.edu/auth/realms/django",
+        "srv_discovery_url": "https://stormwind.oli.cmu.edu/auth/realms/tpz_prod",
         "behaviour": OIDC_DEFAULT_BEHAVIOUR,
         "client_registration": {
-            "client_id": "django",
+            "client_id": "tpz",
             "client_secret": os.environ['client_secret'],
-            "redirect_uris": ["https://stormwind.oli.cmu.edu/openid/callback/login"],
-            "post_logout_redirect_uris": ["https://stormwind.oli.cmu.edu/openid/callback/logout"],
+            "redirect_uris": ["http://localhost:8083/openid/callback/login"],
+            "post_logout_redirect_uris": ["http://localhost:8083/openid/callback/logout"],
         }
     }
 }
