@@ -16,7 +16,7 @@ public class ResourceException extends RuntimeException{
 
     public ResourceException(Status status, String id, String message) {
         super(message);
-        status = status;
+        this.status = status;
         this.id = id;
     }
 

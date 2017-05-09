@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 var keycloak = new Keycloak();
-var serviceUrl = 'http://128.237.188.141:8081/secure'
+var serviceUrl = 'http://128.237.214.54/secure'
 
 function notAuthenticated() {
     document.getElementById('not-authenticated').style.display = 'block';

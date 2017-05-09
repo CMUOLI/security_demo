@@ -7,7 +7,7 @@
     <security-constraint>
         <web-resource-collection>
             <web-resource-name>secured</web-resource-name>
-            <url-pattern>/resources/*</url-pattern>
+            <url-pattern>/api/*</url-pattern>
         </web-resource-collection>
         <auth-constraint>
             <role-name>user</role-name>
@@ -16,6 +16,7 @@
 
     <login-config>
         <auth-method>KEYCLOAK</auth-method>
+        <realm-name>security_zone</realm-name>
     </login-config>
 
     <security-role>

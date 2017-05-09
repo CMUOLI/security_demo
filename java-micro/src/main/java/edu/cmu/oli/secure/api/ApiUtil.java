@@ -2,10 +2,14 @@ package edu.cmu.oli.secure.api;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import com.google.gson.reflect.TypeToken;
 import edu.cmu.oli.secure.ResourceException;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
+import org.keycloak.KeycloakSecurityContext;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.KeycloakBuilder;
+import org.keycloak.admin.client.resource.PoliciesResource;
+import org.keycloak.admin.client.resource.PolicyResource;
 import org.keycloak.admin.client.resource.RealmResource;
 import org.keycloak.authorization.client.AuthzClient;
 import org.keycloak.authorization.client.Configuration;
@@ -25,6 +29,7 @@ import javax.ejb.EJBAccessException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.*;
 
 /**
@@ -32,12 +37,52 @@ import java.util.*;
  */
 public class ApiUtil {
     public static final String MICRO_SERVICE = "java-micro";
-    public static final String REALM = "security_demo";
+    public static final String REALM = "security_zone";
 
-    private static Logger log = LoggerFactory.getLogger(ApiUtil.class);
-    private static AuthzClient authzClient;
-    private static AdapterConfig adapterConfig;
-    private static RealmResource realm;
+    static Logger log = LoggerFactory.getLogger(ApiUtil.class);
+    static AuthzClient authzClient;
+    static AdapterConfig adapterConfig;
+    static RealmResource realm;
+
+    public static Set<String> authorize(KeycloakSecurityContext session, Set<String> roles, String sectionId, String filter, Set<String> scopes) {
+        if (roles == null) {
+            roles = new HashSet<>();
+        }
+        String accessToken = session == null ? null : session.getTokenString();
+        Set<String> realmRoles = session == null ? null : session.getToken().getRealmAccess().getRoles();
+        if (accessToken == null || realmRoles == null) {
+            String message = "Not Logged In";
+            throw new ResourceException(Response.Status.FORBIDDEN, null, message);
+        }
+        if (Collections.disjoint(realmRoles, roles)) {
+            String message = "Not Authorized";
+            throw new ResourceException(Response.Status.FORBIDDEN, null, message);
+        }
+        // Assume Role based authorization (RBA) is desired if scopes or filters not supplied
+        if (scopes == null || scopes.isEmpty() || filter == null) {
+            return new HashSet<>();
+        }
+        // If requested section is not permitted
+        Set<String> permittedPkgs = checkForPermissions(accessToken, filter, scopes);
+        if (permittedPkgs == null) {
+            String message = "Not authorized";
+            throw new ResourceException(Response.Status.FORBIDDEN, null, message);
+        }
+        if (sectionId != null) {
+            boolean permitted = false;
+            for (String permittedPkg : permittedPkgs) {
+                if (permittedPkg.contains(sectionId)) {
+                    permitted = true;
+                    break;
+                }
+            }
+            if (!permitted) {
+                String message = "Not authorized";
+                throw new ResourceException(Response.Status.FORBIDDEN, null, message);
+            }
+        }
+        return permittedPkgs;
+    }
 
     /**
      * Catch all for errors thrown in service layers
@@ -46,20 +91,24 @@ public class ApiUtil {
      * @return
      */
     static Response handelExceptions(Throwable t) {
-        String message = t.toString();
+        String message = t.getLocalizedMessage();
         log.info(message);
-
         Response.Status status = Response.Status.INTERNAL_SERVER_ERROR;
+        t = getRootThrowable(t);
         if (t instanceof ResourceException) {
-            Response.Status errstatus = ((ResourceException) t).getStatus();
-            status = errstatus == null ? Response.Status.NOT_FOUND : errstatus;
-        } else if (t instanceof EJBAccessException || message.toLowerCase().contains("not allowed")) {
-            status = Response.Status.FORBIDDEN;
-            message = "Request Forbidden";
+            status = ((ResourceException) t).getStatus() == null ? Response.Status.NOT_FOUND : ((ResourceException) t).getStatus();
         }
+
         JsonObject je = new JsonObject();
         je.addProperty("messsage", message);
         return Response.status(status).entity(new Gson().toJson(je)).type(MediaType.APPLICATION_JSON).build();
+    }
+
+    private static Throwable getRootThrowable(Throwable t) {
+        if (t.getCause() != null) {
+            return getRootThrowable(t.getCause());
+        }
+        return t;
     }
 
     public static AuthzClient getAuthzClient() {
@@ -144,7 +193,7 @@ public class ApiUtil {
         log.info(existing.toString());
     }
 
-    public static List<Permission> introspectRequestingPartyToken(String accessToken, String filter) {
+    public static Set<String> checkForPermissions(String accessToken, String filter, Set<String> scopes) {
 
         AuthzClient authzClient = ApiUtil.getAuthzClient();
 
@@ -167,7 +216,7 @@ public class ApiUtil {
         try {
             response = authzClient.entitlement(accessToken).get(MICRO_SERVICE, request);
         } catch (Exception ex) {
-            log.debug("AuthorizationDeniedException ", ex);
+            log.error("AuthorizationDeniedException ", ex);
             return null;
         }
         String rpt = response.getRpt();
@@ -187,8 +236,12 @@ public class ApiUtil {
         List<Permission> permissions = requestingPartyToken.getPermissions();
         for (Permission granted : permissions) {
             log.info(granted.toString());
+            if (!Collections.disjoint(granted.getScopes(), scopes)) {
+                resourceNames.add(granted.getResourceSetName());
+                log.info(granted.getResourceSetName());
+            }
         }
-        return permissions;
+        return resourceNames;
     }
 
     private static List<Permission> obtainEntitlementsForResource(String resourceName, String accessToken) {
@@ -252,7 +305,7 @@ public class ApiUtil {
     static RealmResource getRealm() {
         if (realm == null) {
             Keycloak kc = KeycloakBuilder.builder()
-                    .serverUrl("http://128.237.215.67/auth")
+                    .serverUrl("http://128.237.220.60/auth")
                     .realm("master")
                     .username("admin")
                     .password("admin")
@@ -266,11 +319,11 @@ public class ApiUtil {
         return realm;
     }
 
-    public static void createUserPolicy(String name, String userId) {
+    public static void createUserPolicy(String policyName, String userId) {
         // create Representation
         PolicyRepresentation userPolicyRepresentation = new PolicyRepresentation();
-        userPolicyRepresentation.setName(name);
-        userPolicyRepresentation.setDescription(name);
+        userPolicyRepresentation.setName(policyName);
+        userPolicyRepresentation.setDescription(policyName);
         userPolicyRepresentation.setLogic(Logic.POSITIVE);
         userPolicyRepresentation.setDecisionStrategy(DecisionStrategy.AFFIRMATIVE);
         userPolicyRepresentation.setType("user");
@@ -290,21 +343,78 @@ public class ApiUtil {
         response.close();
     }
 
-    public static void deletePolicy(String name) {
-//        AuthzClient authzClient = getAuthzClient();
-//        ProtectedResource resourceClient = authzClient.protection().resource();
-//        Set<String> existingResource = resourceClient.findByFilter("name=" + name);
-//
-//        if (!existingResource.isEmpty()) {
-//            resourceClient.delete(existingResource.iterator().next());
-//        }
+    public static void createOrUpdateUserJsPolicy(String userId, String sectionId, String... accessLevels) {
+        PolicyResource policyResource = findPolicyResourceByName(userId);
+        if (policyResource == null) {
+            // create Representation
+            PolicyRepresentation userPolicyRepresentation = new PolicyRepresentation();
+            userPolicyRepresentation.setName(userId);
+            userPolicyRepresentation.setDescription("Policy controlling user access to configured resources and scopes");
+            userPolicyRepresentation.setLogic(Logic.POSITIVE);
+            userPolicyRepresentation.setDecisionStrategy(DecisionStrategy.UNANIMOUS);
+            userPolicyRepresentation.setType("js");
+            Map<String, String> config = new HashMap<>();
+            String code = "var grantMap = {};\ngrantMap['" + sectionId + "'] = ['course_view_access', 'course_instruct_access'];\n\nvar permit = false;\nvar context = $evaluation.getContext();\nvar policy = $evaluation.getPolicy();\nvar userName = context.getIdentity().getAttributes().getValue(\"preferred_username\").asString(0);\nprint(\"User Name \" + userName);\n\nif (userName === policy.getName()) {\n    var resourcePermission = $evaluation.getPermission();\n    var resourceName = resourcePermission.getResource().getName();\n    print(\"Resource name \" + resourceName);\n    // Grant access only if resourceName and parentPolicy name match 'grantMap' above\n    if (grantMap.hasOwnProperty(resourceName)) {\n        var parentPolicy = $evaluation.getParentPolicy();\n        if (parentPolicy) {\n            print(\"Parent Policy name \" + parentPolicy.getName());\n            grantMap[resourceName].forEach(function (s) {\n                if (s === parentPolicy.getName()) {\n                    permit = true;\n                }\n            });\n        }\n    }\n\n}\n\nif (permit) {\n    $evaluation.grant();\n}";
+            config.put("code", code);
+            userPolicyRepresentation.setConfig(config);
+            final ClientRepresentation clientRepresentation = getRealm().clients().findByClientId(MICRO_SERVICE).get(0);
+            // create
+            Response response = getRealm().clients().get(clientRepresentation.getId()).authorization().policies().create(userPolicyRepresentation);
+            response.close();
+            return;
+        }
+        PolicyRepresentation policyRepresentation = policyResource.toRepresentation();
+        if(!policyRepresentation.getType().equalsIgnoreCase("js")){
+            String message = "Wrong type for a user js policy " + policyRepresentation.getType();
+            log.error(message);
+            throw new ResourceException(Response.Status.INTERNAL_SERVER_ERROR, null, message);
+        }
+        Map<String, String> config = policyRepresentation.getConfig();
+        String code = config.get("code");
+        code = code.substring(code.indexOf(";")+1);
+        String allCode = "var grantMap = {};\ngrantMap['" + sectionId + "'] = ['course_view_access', 'course_instruct_access'];" + code;
+        config.put("code", allCode);
+        policyResource.update(policyRepresentation);
     }
 
-    public static void createRoleScopePolicy(String name, String policy, String resource, String scope) {
+    public static void updateUserPolicy(String policyName, String userId, boolean addUser) {
+        PolicyResource policyResource = findPolicyResourceByName(policyName);
+        if (policyResource == null) {
+            return;
+        }
+        PolicyRepresentation policyRepresentation = policyResource.toRepresentation();
+        Map<String, String> config = policyRepresentation.getConfig();
+        String users = config.get("users");
+        log.info("updateUserPolicy users JSON " + users);
+        if (users != null) {
+            Gson gson = new Gson();
+            Type listType = new TypeToken<Set<String>>() {
+            }.getType();
+            Set<String> ids = gson.fromJson(users, listType);
+            if (addUser) {
+                ids.add(userId);
+            } else {
+                ids.remove(userId);
+            }
+            String json = gson.toJson(ids, listType);
+            config.put("users", json);
+            policyResource.update(policyRepresentation);
+        }
+    }
+
+    public static void deletePolicy(String policyName) {
+        PolicyResource policyResource = findPolicyResourceByName(policyName);
+        if (policyResource == null) {
+            return;
+        }
+        policyResource.remove();
+    }
+
+    public static void createRoleScopePolicy(String policyName, String policy, String resource, String scope) {
         // create Representation
         PolicyRepresentation userPolicyRepresentation = new PolicyRepresentation();
-        userPolicyRepresentation.setName(name);
-        userPolicyRepresentation.setDescription(name);
+        userPolicyRepresentation.setName(policyName);
+        userPolicyRepresentation.setDescription(policyName);
         userPolicyRepresentation.setLogic(Logic.POSITIVE);
         userPolicyRepresentation.setDecisionStrategy(DecisionStrategy.AFFIRMATIVE);
         userPolicyRepresentation.setType("scope");
@@ -336,6 +446,18 @@ public class ApiUtil {
         }
 
         return builder.insert(0, "[").append("]").toString();
+    }
+
+    private static PolicyResource findPolicyResourceByName(String policyName) {
+        ClientRepresentation clientRepresentation = getRealm().clients().findByClientId(MICRO_SERVICE).get(0);
+        PoliciesResource policies = getRealm().clients().get(clientRepresentation.getId()).authorization().policies();
+        PolicyRepresentation policyRep = policies.policies()
+                .stream().filter(policyRepresentation -> policyRepresentation.getName().equals(policyName))
+                .findFirst().orElse(null);
+        if (policyRep != null) {
+            return policies.policy(policyRep.getId());
+        }
+        return null;
     }
 
     private static PolicyRepresentation findPolicyByName(String name) {

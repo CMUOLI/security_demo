@@ -1,6 +1,6 @@
 {
-  "realm": "security_demo",
-  "auth-server-url": "http://127.0.0.1:8084/auth",
+  "realm": "security_zone",
+  "auth-server-url": "http://128.237.214.54/auth",
   "ssl-required": "external",
   "resource": "java-js-client",
   "public-client": true

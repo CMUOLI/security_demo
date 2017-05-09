@@ -2,7 +2,7 @@ version: '2.1'
 services:
   keycloak-sso:
     build:
-      context: ./keycloak-mysql
+      context: ./kc-server
     image: keycloak-mysql
     container_name: keycloak
     env_file:
@@ -50,11 +50,23 @@ services:
       context: ./nginx-proxy
     container_name: proxy
     ports:
-      - "8084:80"
+      - "83:80"
+    volumes:
+      - /oli_content/demo:/usr/share/nginx/html
     networks:
       - service-tier
     depends_on:
-     - content
+     - java-micro
+  ha-proxy:
+    build:
+      context: ./ha-proxy
+    container_name: h-proxy
+    ports:
+      - "80:80"
+    networks:
+      - service-tier
+    depends_on:
+     - java-micro
 networks:
   service-tier:
     driver: bridge

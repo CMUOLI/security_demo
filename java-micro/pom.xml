@@ -2,7 +2,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>edu.cmu.oli</groupId>
-    <artifactId>secure</artifactId>
+    <artifactId>jsecure</artifactId>
     <version>1.0.0</version>
     <packaging>war</packaging>
     <dependencyManagement>
@@ -41,13 +41,13 @@
             <version>3.1.2.Final</version>
             <scope>provided</scope>
         </dependency>
-
         <dependency>
-            <groupId>org.keycloak</groupId>
-            <artifactId>keycloak-core</artifactId>
-            <version>3.0.0.Final</version>
+            <groupId>org.jboss.resteasy</groupId>
+            <artifactId>resteasy-multipart-provider</artifactId>
+            <version>3.1.2.Final</version>
             <scope>provided</scope>
         </dependency>
+
         <dependency>
             <groupId>org.jboss.ejb3</groupId>
             <artifactId>jboss-ejb3-ext-api</artifactId>
@@ -58,13 +58,11 @@
             <groupId>org.keycloak</groupId>
             <artifactId>keycloak-authz-client</artifactId>
             <version>3.0.0.Final</version>
-            <!--<scope>provided</scope>-->
         </dependency>
         <dependency>
             <groupId>org.keycloak</groupId>
             <artifactId>keycloak-admin-client</artifactId>
             <version>3.0.0.Final</version>
-            <!--<scope>provided</scope>-->
         </dependency>
 
         <!-- Logging -->
@@ -114,7 +112,7 @@
     </dependencies>
 
     <build>
-        <finalName>secure</finalName>
+        <finalName>jsecure</finalName>
         <plugins>
             <plugin>
                 <groupId>org.wildfly.plugins</groupId>
@@ -163,7 +161,7 @@
     </properties>
 
     <profiles>
-        <!-- Seperate profiles are provided for running all tests, including
+        <!-- Seperate profiles are provided for runnfindBySection all tests, including
                 Arquillian tests that execute in the specified container -->
         <profile>
             <!-- The default profile is tuned to run just unit tests-->

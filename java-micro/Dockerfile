@@ -8,10 +8,14 @@ RUN cd $JBOSS_HOME \
     && cd $HOME
 ENV DEPLOYMENT_DIR ${JBOSS_HOME}/standalone/deployments/
 USER root
+#RUN yum install zip unzip -y
 ADD execute.sh ${JBOSS_HOME}/
 ADD wait-for-it.sh ${JBOSS_HOME}/
 RUN chmod +x ${JBOSS_HOME}/execute.sh && chmod +x ${JBOSS_HOME}/wait-for-it.sh
 USER jboss
+#ADD resteasy-jboss-modules-3.1.2.Final.zip $JBOSS_HOME/modules/system/layers/base/
+#RUN cd $JBOSS_HOME/modules/system/layers/base/ \
+#    && unzip resteasy-jboss-modules-3.1.2.Final.zip
 #COPY target/authorization.war $DEPLOYMENT_DIR
 ENTRYPOINT ${JBOSS_HOME}/execute.sh
 #ENV DEPLOYMENT_DIR ${JBOSS_HOME}/target
