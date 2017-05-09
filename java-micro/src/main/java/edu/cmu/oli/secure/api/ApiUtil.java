@@ -305,7 +305,7 @@ public class ApiUtil {
     static RealmResource getRealm() {
         if (realm == null) {
             Keycloak kc = KeycloakBuilder.builder()
-                    .serverUrl("http://128.237.220.60/auth")
+                    .serverUrl("http://stormwind.oli.cmu.edu/auth")
                     .realm("master")
                     .username("admin")
                     .password("admin")
