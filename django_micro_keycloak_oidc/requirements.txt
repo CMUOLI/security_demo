@@ -1,4 +1,4 @@
-django==1.10
+django>=1.11.18
 oic>=0.7.6
 PyJWT
 -e git+https://github.com/CloudComputingCourse/django-oidc.git#egg=django-oidc-cmucc
